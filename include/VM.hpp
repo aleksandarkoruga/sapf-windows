@@ -21,7 +21,7 @@
 #include "symbol.hpp"
 #include "rgen.hpp"
 #include <vector>
-#include <sys/time.h>
+#include <ctime>
 #include <atomic>
 
 #define USE_LIBEDIT 1

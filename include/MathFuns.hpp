@@ -17,6 +17,7 @@
 #ifndef __MathFuns_h__
 #define __MathFuns_h__
 
+#include "corecrt_math_defines.h"
 #include <cmath>
 #include <stdint.h>
 #include <stdio.h>

@@ -28,9 +28,9 @@
 #include "ErrorCodes.hpp"
 #include "MathFuns.hpp"
 
-#include <pthread.h>
+#include <mutex>
+//#include <pthread.h>
 #include "RCObj.hpp"
-#include <os/lock.h>
 
 void post(const char* fmt, ...);
 
@@ -519,7 +519,7 @@ class Ref : public Object
 {
 	Z z;
 	O o;
-    mutable os_unfair_lock mSpinLock = OS_UNFAIR_LOCK_INIT;   
+	mutable std::mutex mSpinLock;
 public:
 
 	Ref(V inV) : z(inV.f), o(inV.o()) { if (o) o->retain(); }
@@ -1039,7 +1039,7 @@ public:
 class Plug : public Object
 {
 	VIn in;
-    mutable os_unfair_lock mSpinLock = OS_UNFAIR_LOCK_INIT;   
+    mutable std::mutex mSpinLock;   
 	int mChangeCount;
 public:
 	
@@ -1063,7 +1063,7 @@ public:
 class ZPlug : public Object
 {
 	ZIn in;
-    mutable os_unfair_lock mSpinLock = OS_UNFAIR_LOCK_INIT;   
+    mutable std::mutex mSpinLock;
 	int mChangeCount;
 public:
 	
@@ -1175,7 +1175,7 @@ class List : public Object
 {
 	P<List> mNext;
 public:
-    mutable os_unfair_lock mSpinLock = OS_UNFAIR_LOCK_INIT;   
+    mutable std::mutex mSpinLock;
 	P<Gen> mGen;
 	P<Array> mArray;
 
@@ -1468,15 +1468,18 @@ const int kMaxArgs = 16;
 
 class SpinLocker
 {
-    os_unfair_lock& lock;   
+	std::mutex& lock;  // Reference to std::mutex
 public:
-	SpinLocker(os_unfair_lock& inLock) : lock(inLock) 
+	// Constructor locks the mutex
+	SpinLocker(std::mutex& inLock) : lock(inLock)
 	{
-        os_unfair_lock_lock(&lock);
+		lock.lock();  // Lock the mutex
 	}
+
+	// Destructor unlocks the mutex
 	~SpinLocker()
 	{
-		os_unfair_lock_unlock(&lock);
+		lock.unlock();  // Unlock the mutex
 	}
 };
 
@@ -1496,7 +1499,7 @@ List* handleEachOps(Thread& th, int numArgs, Arg fun);
 P<Form> linearizeInheritance(Thread& th, size_t numArgs, V* args);
 
 ///////////
-
+/*
 #include <CoreFoundation/CFBase.h>
 
 class CFReleaser
@@ -1534,6 +1537,8 @@ public:
 	ArrayDeleter(T* inP) : p(inP) {}
 	~ArrayDeleter() { delete [] p; }
 };
+
+*/
 
 class ScopeLog
 {
