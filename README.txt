@@ -1,4 +1,11 @@
 
+needed changes for Windows:
+- thread management and locks
+- libedit -> readline
+- audio + midi
+
+
+#################################################################################
 WHAT
 
 This program is called:
